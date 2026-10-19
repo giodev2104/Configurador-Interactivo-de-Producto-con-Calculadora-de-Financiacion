@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configura tu bicicleta eléctrica · Ronda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    fontFamily: { sans: ['Bricolage Grotesque', 'system-ui', 'sans-serif'] },
+    colors: { volt: '#C8F53C', ink: '#12161C', fog: '#EEF0F3' }
+  } } };
+</script>
+<style>
+  :focus-visible { outline: 3px solid #C8F53C; outline-offset: 2px; }
+  .on-light:focus-visible { outline-color: #12161C; }
+  input[type=range] { accent-color: #C8F53C; width: 100%; }
+  .opt[aria-pressed="true"], .opt[aria-checked="true"] { border-color: #12161C; background: #fff; box-shadow: inset 0 0 0 1px #12161C; }
+  #bike * { transition: stroke .3s, fill .3s; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body class="bg-fog text-ink font-sans antialiased">
+
+<div id="shop">
+<header class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
+  <p class="text-xl font-bold tracking-tight">Ronda</p>
+  <div class="flex items-center gap-5">
+    <p class="hidden sm:block text-sm text-ink/60">Bicicletas eléctricas urbanas</p>
+    <a href="#admin" class="text-sm text-ink/60 hover:text-ink underline underline-offset-2">Acceso empresa</a>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 pb-16 grid lg:grid-cols-[1fr_400px] gap-8 items-start">
+
+  <!-- ============ COLUMNA IZQUIERDA: CONFIGURADOR ============ -->
+  <div class="space-y-8">
+
+    <!-- Vista previa: el SVG reacciona al color, la batería extra y la cesta -->
+    <section class="rounded-2xl bg-white p-4 sm:p-6" aria-label="Vista previa de tu configuración">
+      <svg id="bike" viewBox="0 0 400 230" class="w-full max-h-64" role="img" aria-label="Ilustración de la bicicleta configurada" style="--frame:#2B2F36">
+        <g fill="none" stroke="#12161C" stroke-width="6">
+          <circle cx="95" cy="160" r="52"/><circle cx="305" cy="160" r="52"/>
+        </g>
+        <g fill="none" stroke="#12161C" stroke-width="1.5" opacity=".35">
+          <circle cx="95" cy="160" r="40"/><circle cx="305" cy="160" r="40"/>
+        </g>
+        <g fill="none" stroke="var(--frame)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="95,160 185,160 165,95 95,160"/>
+          <polyline points="165,95 280,100 185,160"/>
+          <line x1="280" y1="100" x2="305" y2="160"/>
+          <polyline points="272,70 280,100"/>
+        </g>
+        <g stroke="#12161C" stroke-width="6" stroke-linecap="round">
+          <line x1="160" y1="80" x2="165" y2="95"/><line x1="140" y1="78" x2="182" y2="78"/>
+          <line x1="262" y1="68" x2="296" y2="64"/>
+        </g>
+        <rect x="205" y="112" width="52" height="14" rx="4" transform="rotate(12 205 112)" fill="#12161C"/>
+        <rect id="svg-battery2" x="130" y="96" width="14" height="44" rx="4" fill="#C8F53C" stroke="#12161C" stroke-width="2" class="hidden"/>
+        <g id="svg-basket" class="hidden" fill="none" stroke="#12161C" stroke-width="3">
+          <rect x="296" y="30" width="54" height="32" rx="4"/><path d="M308 30v32M323 30v32M338 30v32"/>
+        </g>
+        <g id="svg-light" class="hidden"><circle cx="300" cy="66" r="5" fill="#C8F53C" stroke="#12161C" stroke-width="2"/></g>
+      </svg>
+      <p class="text-center text-sm text-ink/60" id="preview-caption"></p>
+    </section>
+
+    <!-- 1. Modelo (selección única) -->
+    <section aria-labelledby="h-model">
+      <h2 id="h-model" class="text-lg font-semibold mb-3">1. Elige el modelo</h2>
+      <div id="models" class="grid sm:grid-cols-3 gap-3" role="radiogroup" aria-labelledby="h-model"></div>
+    </section>
+
+    <!-- 2. Acabado (selección única) -->
+    <section aria-labelledby="h-finish">
+      <h2 id="h-finish" class="text-lg font-semibold mb-3">2. Elige el acabado</h2>
+      <div id="finishes" class="grid grid-cols-2 sm:grid-cols-4 gap-3" role="radiogroup" aria-labelledby="h-finish"></div>
+    </section>
+
+    <!-- 3. Extras (selección múltiple) -->
+    <section aria-labelledby="h-extras">
+      <h2 id="h-extras" class="text-lg font-semibold mb-1">3. Añade extras</h2>
+      <p class="text-sm text-ink/60 mb-3">Puedes combinarlos como quieras; el total se actualiza al instante.</p>
+      <div id="extras" class="grid sm:grid-cols-2 gap-3"></div>
+    </section>
+  </div>
+
+  <!-- ============ COLUMNA DERECHA: RESUMEN FINANCIERO ============ -->
+  <aside class="lg:sticky lg:top-6 rounded-2xl bg-ink text-white p-6 space-y-6" aria-label="Resumen financiero">
+    <div>
+      <p class="text-white/60 text-sm">Tu cuota mensual estimada</p>
+      <p class="mt-1 flex items-baseline gap-2">
+        <span id="fee" class="text-6xl font-bold text-volt tabular-nums leading-none">0</span>
+        <span class="text-xl text-white/70">€/mes</span>
+      </p>
+      <p id="fee-sub" class="mt-2 text-sm text-white/60"></p>
+    </div>
+
+    <!-- Sliders de financiación -->
+    <div class="space-y-5">
+      <div>
+        <div class="flex justify-between text-sm"><label for="down" class="font-medium">Entrada inicial</label><output id="down-out" class="tabular-nums"></output></div>
+        <input id="down" type="range" min="0" max="1000" step="50" value="0" class="mt-2">
+        <p class="text-xs text-white/50 mt-1">Hasta el 50 % del precio total.</p>
+      </div>
+      <div>
+        <div class="flex justify-between text-sm"><label for="term" class="font-medium">Plazo de pago</label><output id="term-out" class="tabular-nums"></output></div>
+        <input id="term" type="range" min="0" max="3" step="1" value="2" class="mt-2">
+        <div class="flex justify-between text-xs text-white/50 mt-1" aria-hidden="true"><span>12</span><span>24</span><span>36</span><span>48</span></div>
+      </div>
+      <div>
+        <div class="flex justify-between text-sm"><label for="tin" class="font-medium">Tipo de interés fijo (TIN)</label><output id="tin-out" class="tabular-nums"></output></div>
+        <input id="tin" type="range" min="0" max="12" step="0.25" value="6.9" class="mt-2">
+        <p class="text-xs text-white/50 mt-1">TAE resultante: <span id="tae" class="text-white/80 tabular-nums"></span></p>
+      </div>
+    </div>
+
+    <!-- Desglose -->
+    <dl class="text-sm space-y-2 border-t border-white/15 pt-5" id="breakdown"></dl>
+
+    <button id="open-form" class="on-light w-full rounded-xl bg-volt text-ink font-semibold py-3.5 hover:brightness-95">Solicitar estudio sin compromiso</button>
+    <p class="text-xs text-white/45 leading-relaxed">Simulación orientativa. La concesión de la financiación está sujeta a estudio y aprobación de la entidad.</p>
+  </aside>
+</main>
+</div><!-- /#shop -->
+
+<!-- ============ PANEL DE EMPRESA (#admin) ============ -->
+<section id="admin" class="hidden max-w-7xl mx-auto px-4 sm:px-6 py-5 pb-16">
+  <div class="flex items-center justify-between gap-4">
+    <p class="text-xl font-bold tracking-tight">Ronda · Gestión de financiaciones</p>
+    <div class="flex items-center gap-4 text-sm">
+      <a href="#" id="admin-exit" class="underline underline-offset-2 text-ink/70 hover:text-ink">Volver a la tienda</a>
+      <button id="admin-logout" class="rounded-md border border-ink/20 px-3 py-1.5 hover:bg-white">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- Acceso con PIN (solo demo) -->
+  <div id="admin-login" class="mt-10 max-w-sm mx-auto rounded-2xl bg-white p-6">
+    <h1 class="text-xl font-semibold">Acceso de empresa</h1>
+    <p class="text-sm text-ink/60 mt-1">Introduce el PIN de administración. En esta demo es 1234.</p>
+    <form id="admin-login-form" class="mt-4 space-y-3" novalidate>
+      <label class="block text-sm font-medium">PIN
+        <input id="pin" type="password" inputmode="numeric" autocomplete="off" class="mt-1 w-full rounded-md border border-ink/20 px-3 py-2.5 text-sm">
+      </label>
+      <p id="pin-error" class="hidden text-sm text-red-600" role="alert">PIN incorrecto.</p>
+      <button class="w-full rounded-xl bg-ink text-white font-semibold py-2.5 hover:bg-ink/90">Entrar</button>
+    </form>
+  </div>
+
+  <!-- Panel -->
+  <div id="admin-panel" class="hidden">
+    <dl id="kpis" class="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3"></dl>
+
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <label class="sr-only" for="a-search">Buscar solicitud</label>
+      <input id="a-search" type="search" placeholder="Buscar por nombre, correo, teléfono o referencia" class="flex-1 min-w-[220px] rounded-md border border-ink/20 bg-white px-3 py-2 text-sm">
+      <label class="sr-only" for="a-status">Filtrar por estado</label>
+      <select id="a-status" class="rounded-md border border-ink/20 bg-white px-3 py-2 text-sm">
+        <option value="all">Todos los estados</option>
+        <option value="nueva">Nuevas</option><option value="estudio">En estudio</option><option value="aprobada">Aprobadas</option>
+        <option value="rechazada">Rechazadas</option><option value="formalizada">Formalizadas</option>
+      </select>
+      <button id="a-export" class="rounded-md bg-ink text-white px-3 py-2 text-sm font-semibold hover:bg-ink/90">Exportar CSV</button>
+      <button id="a-seed" class="rounded-md border border-ink/20 bg-white px-3 py-2 text-sm hover:bg-fog">Cargar datos de ejemplo</button>
+      <button id="a-clear" class="rounded-md border border-red-300 text-red-700 bg-white px-3 py-2 text-sm hover:bg-red-50">Vaciar todo</button>
+    </div>
+
+    <div class="mt-4 rounded-2xl bg-white overflow-x-auto">
+      <table class="w-full text-sm min-w-[860px]">
+        <thead class="text-left text-ink/60">
+          <tr><th class="p-3 font-medium">Solicitud</th><th class="p-3 font-medium">Cliente</th><th class="p-3 font-medium">Configuración</th>
+              <th class="p-3 font-medium">Financiación</th><th class="p-3 font-medium">Estado</th><th class="p-3"><span class="sr-only">Acciones</span></th></tr>
+        </thead>
+        <tbody id="leads"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Ficha de una solicitud -->
+<dialog id="lead-dlg" class="w-[min(94vw,620px)] rounded-2xl p-0 backdrop:bg-black/60 text-ink">
+  <div class="p-6 sm:p-7">
+    <div class="flex items-start justify-between gap-4">
+      <h2 id="ld-title" class="text-xl font-semibold"></h2>
+      <button id="ld-close" class="text-sm text-ink/60 hover:text-ink">Cerrar</button>
+    </div>
+    <div id="ld-body" class="mt-4 space-y-4"></div>
+    <div class="mt-5 grid sm:grid-cols-[180px_1fr] gap-4">
+      <label class="block text-sm font-medium">Estado
+        <select id="ld-status" class="mt-1 w-full rounded-md border border-ink/20 px-3 py-2.5 text-sm"></select>
+      </label>
+      <label class="block text-sm font-medium">Notas internas
+        <textarea id="ld-notes" rows="3" class="mt-1 w-full rounded-md border border-ink/20 px-3 py-2 text-sm" placeholder="Llamada realizada, documentación pendiente…"></textarea>
+      </label>
+    </div>
+    <div class="mt-4">
+      <h3 class="text-sm font-semibold">Historial de estados</h3>
+      <ul id="ld-history" class="mt-1 text-sm text-ink/70 space-y-0.5"></ul>
+    </div>
+    <div class="mt-6 flex items-center justify-between">
+      <button id="ld-delete" class="text-sm text-red-700 underline underline-offset-2">Eliminar solicitud</button>
+      <button id="ld-save" class="rounded-xl bg-ink text-white font-semibold px-6 py-2.5 hover:bg-ink/90">Guardar cambios</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- ============ FORMULARIO FLOTANTE ============ -->
+<dialog id="dlg" class="w-[min(92vw,520px)] rounded-2xl p-0 backdrop:bg-black/60 text-ink">
+  <div class="p-6 sm:p-7">
+    <div class="flex items-start justify-between gap-4">
+      <h2 class="text-2xl font-semibold">Solicita tu estudio</h2>
+      <button id="close-dlg" class="text-ink/60 hover:text-ink text-sm" aria-label="Cerrar formulario">Cerrar</button>
+    </div>
+
+    <div id="form-view">
+      <p class="mt-1 text-sm text-ink/60">Te enviaremos una propuesta con esta configuración. No supone ningún compromiso.</p>
+      <div class="mt-4 rounded-lg bg-fog p-4 text-sm">
+        <p class="font-semibold" id="dlg-title"></p>
+        <p class="text-ink/70 mt-1" id="dlg-detail"></p>
+        <p class="mt-2 font-semibold" id="dlg-fee"></p>
+      </div>
+      <form id="lead-form" class="mt-5 space-y-3" novalidate>
+        <label class="block text-sm font-medium">Nombre y apellidos
+          <input name="nombre" required autocomplete="name" class="mt-1 w-full rounded-md border border-ink/20 px-3 py-2.5 text-sm">
+        </label>
+        <label class="block text-sm font-medium">Correo electrónico
+          <input name="email" type="email" required autocomplete="email" class="mt-1 w-full rounded-md border border-ink/20 px-3 py-2.5 text-sm">
+        </label>
+        <label class="block text-sm font-medium">Teléfono
+          <input name="telefono" type="tel" required autocomplete="tel" class="mt-1 w-full rounded-md border border-ink/20 px-3 py-2.5 text-sm">
+        </label>
+        <label class="flex gap-2 items-start text-xs text-ink/70">
+          <input name="privacidad" type="checkbox" class="mt-0.5 accent-ink">
+          <span>Acepto que me contacten para el estudio y el tratamiento de mis datos según la política de privacidad.</span>
+        </label>
+        <p id="form-error" class="hidden text-sm text-red-600" role="alert"></p>
+        <button id="submit-btn" class="w-full rounded-xl bg-ink text-white font-semibold py-3 hover:bg-ink/90">Enviar solicitud</button>
+      </form>
+    </div>
+
+    <div id="done-view" class="hidden py-8 text-center">
+      <p class="text-3xl font-semibold">Solicitud enviada</p>
+      <p class="mt-3 text-ink/70 text-sm">Te contactaremos en menos de 24 horas laborables con tu estudio personalizado.</p>
+      <button id="done-close" class="mt-6 rounded-xl bg-ink text-white font-semibold px-6 py-2.5">Volver al configurador</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (s) => document.querySelector(s);
+
+  // ---------- Catálogo (sustituir por datos reales o una API) ----------
+  const MODELS = [
+    { id: 'urban',    name: 'Ronda Urban',    price: 1890, icon: '🚲', note: 'Ligera, 80 km de autonomía' },
+    { id: 'trekking', name: 'Ronda Trekking', price: 2390, icon: '⛰️', note: 'Motor 85 Nm, 120 km' },
+    { id: 'cargo',    name: 'Ronda Cargo',    price: 2990, icon: '📦', note: 'Hasta 150 kg de carga' }
+  ];
+  const FINISHES = [
+    { id: 'grafito', name: 'Grafito', price: 0,   color: '#2B2F36' },
+    { id: 'hueso',   name: 'Hueso',   price: 0,   color: '#E3DCCB' },
+    { id: 'cobalto', name: 'Cobalto', price: 120, color: '#2F5BEA' },
+    { id: 'cobre',   name: 'Cobre',   price: 150, color: '#B8683A' }
+  ];
+  const EXTRAS = [
+    { id: 'bateria', name: 'Batería extra 500 Wh', price: 450, icon: '🔋' },
+    { id: 'cesta',   name: 'Cesta frontal',        price: 85,  icon: '🧺' },
+    { id: 'candado', name: 'Candado de alta seguridad', price: 59, icon: '🔒' },
+    { id: 'luces',   name: 'Kit de luces integradas',   price: 49, icon: '💡' },
+    { id: 'seguro',  name: 'Seguro antirrobo 2 años',   price: 120, icon: '🛡️' }
+  ];
+  const TERMS = [12, 24, 36, 48];   // meses disponibles
+  const MAX_DOWN_RATIO = 0.5;       // entrada máxima: 50 % del total
+
+  // ---------- Estado único de la aplicación ----------
+  const state = { model: 'urban', finish: 'grafito', extras: new Set(), down: 0, termIdx: 2, tin: 6.9 };
+
+  // ---------- Utilidades ----------
+  const eur = (n, dec = 0) => n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: dec, maximumFractionDigits: dec });
+  const pct = (n) => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' %';
+  const byId = (list, id) => list.find((x) => x.id === id);
+
+  // ---------- Cálculo ----------
+  /** Precio total = modelo + acabado + suma de extras */
+  function getTotal() {
+    const extras = [...state.extras].reduce((s, id) => s + byId(EXTRAS, id).price, 0);
+    return byId(MODELS, state.model).price + byId(FINISHES, state.finish).price + extras;
+  }
+
+  /**
+   * Cuota con sistema francés (cuota constante):
+   *   cuota = C · i / (1 − (1 + i)^−n)     i = TIN/12, n = nº de meses
+   * Con interés 0 la fórmula divide por cero, así que se reparte a partes iguales.
+   * TAE = (1 + TIN/12)^12 − 1  (capitalización mensual, sin comisiones).
+   */
+  function calcFinance(total) {
+    const financed = total - state.down;
+    const n = TERMS[state.termIdx];
+    const i = state.tin / 100 / 12;
+    const fee = financed <= 0 ? 0 : i === 0 ? financed / n : (financed * i) / (1 - Math.pow(1 + i, -n));
+    const totalPaid = fee * n;
+    return { financed, n, fee, totalPaid, interest: totalPaid - financed, tae: (Math.pow(1 + i, 12) - 1) * 100 };
+  }
+
+  // ---------- Render de las opciones (botones) ----------
+  const optClass = 'opt text-left rounded-xl border border-ink/15 bg-white/60 p-4 hover:border-ink/50 transition-colors';
+
+  function renderOptions() {
+    $('#models').innerHTML = MODELS.map((m) => `
+      <button role="radio" aria-checked="${state.model === m.id}" data-model="${m.id}" class="${optClass}">
+        <span class="text-2xl" aria-hidden="true">${m.icon}</span>
+        <span class="block font-semibold mt-1">${m.name}</span>
+        <span class="block text-xs text-ink/60">${m.note}</span>
+        <span class="block mt-2 font-semibold">${eur(m.price)}</span>
+      </button>`).join('');
+
+    $('#finishes').innerHTML = FINISHES.map((f) => `
+      <button role="radio" aria-checked="${state.finish === f.id}" data-finish="${f.id}" class="${optClass}">
+        <span class="block w-8 h-8 rounded-full border border-ink/20" style="background:${f.color}" aria-hidden="true"></span>
+        <span class="block font-semibold mt-2">${f.name}</span>
+        <span class="block text-xs text-ink/60">${f.price ? '+' + eur(f.price) : 'Incluido'}</span>
+      </button>`).join('');
+
+    $('#extras').innerHTML = EXTRAS.map((x) => `
+      <button aria-pressed="${state.extras.has(x.id)}" data-extra="${x.id}" class="${optClass} flex items-center gap-3">
+        <span class="text-2xl" aria-hidden="true">${x.icon}</span>
+        <span class="flex-1"><span class="block font-medium text-sm">${x.name}</span><span class="block text-xs text-ink/60">+${eur(x.price)}</span></span>
+        <span class="text-xs font-semibold">${state.extras.has(x.id) ? 'Añadido' : 'Añadir'}</span>
+      </button>`).join('');
+  }
+
+  // ---------- Render de resultados (se llama con cada cambio) ----------
+  function renderOutput() {
+    const total = getTotal();
+
+    // La entrada máxima depende del total: se reajusta el slider si cambia la configuración
+    const maxDown = Math.floor((total * MAX_DOWN_RATIO) / 50) * 50;
+    state.down = Math.min(state.down, maxDown);
+    const down = $('#down'); down.max = maxDown; down.value = state.down;
+
+    const f = calcFinance(total);
+    $('#down-out').textContent = eur(state.down);
+    $('#term-out').textContent = f.n + ' meses';
+    $('#tin-out').textContent = pct(state.tin);
+    $('#tae').textContent = pct(f.tae);
+
+    $('#fee').textContent = f.fee.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    $('#fee-sub').textContent = f.financed <= 0 ? 'Pagas el total en la entrada: no hay financiación.' : `Durante ${f.n} meses, financiando ${eur(f.financed)}.`;
+
+    const model = byId(MODELS, state.model), fin = byId(FINISHES, state.finish);
+    const extras = [...state.extras].map((id) => byId(EXTRAS, id));
+    const row = (label, value, strong) => `<div class="flex justify-between gap-4 ${strong ? 'font-semibold text-base pt-2 border-t border-white/15' : 'text-white/80'}"><dt>${label}</dt><dd class="tabular-nums shrink-0">${value}</dd></div>`;
+    $('#breakdown').innerHTML =
+      row(model.name, eur(model.price)) +
+      row('Acabado ' + fin.name, fin.price ? eur(fin.price) : 'Incluido') +
+      extras.map((x) => row(x.name, eur(x.price))).join('') +
+      row('Precio total', eur(total), true) +
+      row('Entrada', '− ' + eur(state.down)) +
+      row('Intereses totales', eur(f.interest)) +
+      row('Total a pagar', eur(state.down + f.totalPaid), true);
+
+    // Vista previa: color de cuadro y accesorios visibles
+    $('#bike').style.setProperty('--frame', fin.color);
+    $('#svg-battery2').classList.toggle('hidden', !state.extras.has('bateria'));
+    $('#svg-basket').classList.toggle('hidden', !state.extras.has('cesta'));
+    $('#svg-light').classList.toggle('hidden', !state.extras.has('luces'));
+    $('#preview-caption').textContent = `${model.name} · ${fin.name}${extras.length ? ' · ' + extras.length + (extras.length === 1 ? ' extra' : ' extras') : ''}`;
+
+    return { total, f, model, fin, extras };
+  }
+
+  // ---------- Eventos de la configuración ----------
+  document.addEventListener('click', (e) => {
+    const m = e.target.closest('[data-model]'), fi = e.target.closest('[data-finish]'), x = e.target.closest('[data-extra]');
+    if (m) state.model = m.dataset.model;
+    else if (fi) state.finish = fi.dataset.finish;
+    else if (x) state.extras.has(x.dataset.extra) ? state.extras.delete(x.dataset.extra) : state.extras.add(x.dataset.extra);
+    else return;
+    // Se vuelve a pintar los botones; el foco se restaura para no perder la posición con teclado
+    const key = e.target.closest('button').outerHTML.match(/data-(model|finish|extra)="[^"]+"/)[0];
+    renderOptions(); renderOutput();
+    document.querySelector(`[${key}]`)?.focus();
+  });
+
+  // Sliders: solo se actualizan los números (no los botones) para que el arrastre sea fluido
+  $('#down').addEventListener('input', (e) => { state.down = +e.target.value; renderOutput(); });
+  $('#term').addEventListener('input', (e) => { state.termIdx = +e.target.value; renderOutput(); });
+  $('#tin').addEventListener('input', (e) => { state.tin = +e.target.value; renderOutput(); });
+
+  // ---------- Formulario de captación ----------
+  const dlg = $('#dlg');
+  $('#open-form').addEventListener('click', () => {
+    const { total, f, model, fin, extras } = renderOutput();
+    $('#dlg-title').textContent = `${model.name} · ${fin.name} · ${eur(total)}`;
+    $('#dlg-detail').textContent = (extras.length ? 'Extras: ' + extras.map((x) => x.name).join(', ') + '. ' : 'Sin extras. ') +
+      `Entrada ${eur(state.down)}, ${f.n} meses al ${pct(state.tin)} TIN.`;
+    $('#dlg-fee').textContent = `Cuota estimada: ${eur(f.fee, 2)}/mes`;
+    $('#form-view').classList.remove('hidden'); $('#done-view').classList.add('hidden');
+    $('#form-error').classList.add('hidden');
+    dlg.showModal();
+  });
+  const closeDlg = () => dlg.close();
+  $('#close-dlg').addEventListener('click', closeDlg);
+  $('#done-close').addEventListener('click', closeDlg);
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) closeDlg(); }); // clic en el fondo oscuro
+
+  $('#lead-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target), err = $('#form-error');
+    const fail = (msg) => { err.textContent = msg; err.classList.remove('hidden'); };
+    if (!fd.get('nombre').trim() || !fd.get('telefono').trim()) return fail('Completa tu nombre y tu teléfono.');
+    if (!/^\S+@\S+\.\S+$/.test(fd.get('email'))) return fail('Escribe un correo electrónico válido.');
+    if (!fd.get('privacidad')) return fail('Acepta la política de privacidad para continuar.');
+
+    const { total, f, model, fin, extras } = renderOutput();
+    // Carga útil con el desglose completo: esto es lo que recibiría tu CRM o backend
+    const payload = {
+      cliente: { nombre: fd.get('nombre').trim(), email: fd.get('email'), telefono: fd.get('telefono').trim() },
+      configuracion: { modelo: model.name, acabado: fin.name, extras: extras.map((x) => x.name), precioTotal: total },
+      financiacion: { entrada: state.down, importeFinanciado: f.financed, plazoMeses: f.n, tin: state.tin,
+        tae: +f.tae.toFixed(2), cuotaMensual: +f.fee.toFixed(2), interesesTotales: +f.interest.toFixed(2) },
+      fecha: new Date().toISOString()
+    };
+
+    const btn = $('#submit-btn'); btn.disabled = true; btn.textContent = 'Enviando…';
+    try {
+      // TODO: sustituir por tu endpoint real (Formspree, Netlify Forms, Zapier, tu API…):
+      // await fetch('https://tu-endpoint.com/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      saveLead(payload); // la solicitud queda disponible en el panel de empresa (#admin)
+      console.log('Solicitud de estudio:', payload);
+      await new Promise((r) => setTimeout(r, 700)); // simula la respuesta del servidor
+      $('#form-view').classList.add('hidden'); $('#done-view').classList.remove('hidden');
+      e.target.reset();
+    } catch (error) {
+      fail('No hemos podido enviar la solicitud. Inténtalo de nuevo en unos minutos.');
+    } finally { btn.disabled = false; btn.textContent = 'Enviar solicitud'; }
+  });
+
+  // =====================================================================
+  //  PANEL DE EMPRESA: gestión de solicitudes de financiación
+  //  Las solicitudes se guardan en localStorage (solo en este navegador).
+  //  En producción: sustituye loadLeads/persist por llamadas a tu backend.
+  // =====================================================================
+  const STORE_KEY = 'ronda-solicitudes';
+  const SESSION_KEY = 'ronda-admin';
+  const ADMIN_PIN = '1234'; // SOLO DEMO: un PIN escrito en el cliente no protege nada
+  const STATUS = {
+    nueva:       { label: 'Nueva',       cls: 'bg-blue-100 text-blue-800' },
+    estudio:     { label: 'En estudio',  cls: 'bg-amber-100 text-amber-800' },
+    aprobada:    { label: 'Aprobada',    cls: 'bg-emerald-100 text-emerald-800' },
+    rechazada:   { label: 'Rechazada',   cls: 'bg-red-100 text-red-800' },
+    formalizada: { label: 'Formalizada', cls: 'bg-ink text-volt' }
+  };
+
+  let memoryLeads = [];   // respaldo si localStorage no está disponible
+  const loadLeads = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch (e) { return memoryLeads; } };
+  let leads = loadLeads();
+  const persist = () => { memoryLeads = leads; try { localStorage.setItem(STORE_KEY, JSON.stringify(leads)); } catch (e) { /* sin almacenamiento */ } };
+
+  let adminOk = false;
+  try { adminOk = sessionStorage.getItem(SESSION_KEY) === '1'; } catch (e) {}
+
+  // Todo lo que escribe el cliente se escapa antes de pintarlo en el panel (evita inyección de HTML)
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fdate = (d) => new Date(d).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+  const statusOptions = (sel) => Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${v.label}</option>`).join('');
+
+  /** Guarda una solicitud nueva (se llama desde el formulario de la tienda) */
+  function saveLead(payload) {
+    leads.unshift({ id: 'F-' + Date.now().toString(36).toUpperCase(), ...payload, estado: 'nueva', notas: '',
+      historial: [{ fecha: payload.fecha, estado: 'nueva' }] });
+    persist();
+  }
+
+  /** Cambia el estado y deja constancia en el historial */
+  function setStatus(lead, estado) {
+    if (lead.estado === estado) return;
+    lead.estado = estado;
+    lead.historial.push({ fecha: new Date().toISOString(), estado });
+  }
+
+  // ---------- Tabla e indicadores ----------
+  function renderAdmin() {
+    const q = $('#a-search').value.trim().toLowerCase(), st = $('#a-status').value;
+    const rows = leads.filter((l) => (st === 'all' || l.estado === st) &&
+      (!q || [l.id, l.cliente.nombre, l.cliente.email, l.cliente.telefono].some((v) => v.toLowerCase().includes(q))));
+
+    // Indicadores sobre el total de solicitudes (no sobre el filtro)
+    const won = leads.filter((l) => l.estado === 'aprobada' || l.estado === 'formalizada');
+    const decided = won.length + leads.filter((l) => l.estado === 'rechazada').length;
+    const kpi = (label, value) => `<div class="rounded-xl bg-white p-4"><dt class="text-sm text-ink/60">${label}</dt><dd class="text-2xl font-bold mt-1 tabular-nums">${value}</dd></div>`;
+    $('#kpis').innerHTML =
+      kpi('Solicitudes recibidas', leads.length) +
+      kpi('Pendientes de resolver', leads.filter((l) => l.estado === 'nueva' || l.estado === 'estudio').length) +
+      kpi('Importe aprobado', eur(won.reduce((s, l) => s + l.financiacion.importeFinanciado, 0))) +
+      kpi('Tasa de aprobación', decided ? Math.round((won.length / decided) * 100) + ' %' : '—');
+
+    $('#leads').innerHTML = rows.length ? rows.map((l) => {
+      const c = l.configuracion, f = l.financiacion;
+      return `<tr class="border-t border-ink/10 align-top">
+        <td class="p-3"><p class="font-semibold">${esc(l.id)}</p><p class="text-xs text-ink/60">${fdate(l.fecha)}</p></td>
+        <td class="p-3"><p class="font-medium">${esc(l.cliente.nombre)}</p><p class="text-xs text-ink/60">${esc(l.cliente.email)}<br>${esc(l.cliente.telefono)}</p></td>
+        <td class="p-3"><p>${esc(c.modelo)} · ${esc(c.acabado)}</p><p class="text-xs text-ink/60">${c.extras.length} ${c.extras.length === 1 ? 'extra' : 'extras'} · ${eur(c.precioTotal)}</p></td>
+        <td class="p-3 tabular-nums"><p class="font-semibold">${eur(f.cuotaMensual, 2)}/mes</p><p class="text-xs text-ink/60">${f.plazoMeses} meses · financia ${eur(f.importeFinanciado)}</p></td>
+        <td class="p-3"><label class="sr-only" for="st-${esc(l.id)}">Estado de ${esc(l.id)}</label>
+          <select id="st-${esc(l.id)}" data-status="${esc(l.id)}" class="rounded-md border border-ink/20 px-2 py-1 text-sm ${STATUS[l.estado].cls}">${statusOptions(l.estado)}</select></td>
+        <td class="p-3 text-right"><button data-view="${esc(l.id)}" class="underline underline-offset-2 text-sm">Ver ficha</button></td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="6" class="p-8 text-center text-ink/60">${leads.length ? 'Ninguna solicitud coincide con los filtros.' : 'Aún no hay solicitudes. Llegarán aquí cuando un cliente use el botón “Solicitar estudio”, o pulsa “Cargar datos de ejemplo”.'}</td></tr>`;
+  }
+
+  // Cambio rápido de estado desde la tabla y apertura de la ficha
+  $('#leads').addEventListener('change', (e) => {
+    const sel = e.target.closest('[data-status]'); if (!sel) return;
+    setStatus(leads.find((l) => l.id === sel.dataset.status), sel.value); persist(); renderAdmin();
+  });
+  $('#leads').addEventListener('click', (e) => { const b = e.target.closest('[data-view]'); if (b) openLead(b.dataset.view); });
+  $('#a-search').addEventListener('input', renderAdmin);
+  $('#a-status').addEventListener('change', renderAdmin);
+
+  // ---------- Ficha de solicitud ----------
+  const ldlg = $('#lead-dlg');
+  let current = null;
+
+  function openLead(id) {
+    current = leads.find((l) => l.id === id); if (!current) return;
+    const l = current, c = l.configuracion, f = l.financiacion;
+    const row = (k, v) => `<div class="flex justify-between gap-4 py-1"><dt class="text-ink/60">${k}</dt><dd class="font-medium text-right">${v}</dd></div>`;
+    const block = (title, rows) => `<div><h3 class="text-sm font-semibold">${title}</h3><dl class="text-sm divide-y divide-ink/10">${rows}</dl></div>`;
+    $('#ld-title').textContent = `${l.id} · ${l.cliente.nombre}`;
+    $('#ld-body').innerHTML =
+      block('Cliente',
+        row('Correo', `<a class="underline" href="mailto:${esc(l.cliente.email)}">${esc(l.cliente.email)}</a>`) +
+        row('Teléfono', `<a class="underline" href="tel:${esc(l.cliente.telefono)}">${esc(l.cliente.telefono)}</a>`) +
+        row('Recibida', fdate(l.fecha))) +
+      block('Configuración',
+        row('Modelo', esc(c.modelo)) + row('Acabado', esc(c.acabado)) +
+        row('Extras', c.extras.length ? esc(c.extras.join(', ')) : 'Ninguno') + row('Precio total', eur(c.precioTotal))) +
+      block('Financiación solicitada',
+        row('Entrada', eur(f.entrada)) + row('Importe financiado', eur(f.importeFinanciado)) + row('Plazo', f.plazoMeses + ' meses') +
+        row('TIN / TAE', pct(f.tin) + ' / ' + pct(f.tae)) + row('Cuota mensual', eur(f.cuotaMensual, 2)) +
+        row('Intereses totales', eur(f.interesesTotales, 2)));
+    $('#ld-status').innerHTML = statusOptions(l.estado);
+    $('#ld-notes').value = l.notas || '';
+    $('#ld-history').innerHTML = l.historial.map((h) => `<li>${fdate(h.fecha)} · ${STATUS[h.estado].label}</li>`).join('');
+    ldlg.showModal();
+  }
+  $('#ld-close').addEventListener('click', () => ldlg.close());
+  ldlg.addEventListener('click', (e) => { if (e.target === ldlg) ldlg.close(); });
+  $('#ld-save').addEventListener('click', () => {
+    setStatus(current, $('#ld-status').value); current.notas = $('#ld-notes').value.trim();
+    persist(); ldlg.close(); renderAdmin();
+  });
+  $('#ld-delete').addEventListener('click', () => {
+    if (!confirm(`¿Eliminar la solicitud ${current.id}? Esta acción no se puede deshacer.`)) return;
+    leads = leads.filter((l) => l !== current); persist(); ldlg.close(); renderAdmin();
+  });
+
+  // ---------- Exportar CSV (separador ; y BOM para que Excel en español lo abra bien) ----------
+  $('#a-export').addEventListener('click', () => {
+    const cell = (v) => '"' + String(v).replace(/"/g, '""') + '"';
+    const num = (n) => String(n).replace('.', ',');
+    const head = ['Referencia', 'Fecha', 'Nombre', 'Correo', 'Teléfono', 'Modelo', 'Acabado', 'Extras', 'Precio total', 'Entrada',
+      'Financiado', 'Plazo (meses)', 'TIN %', 'TAE %', 'Cuota mensual', 'Estado', 'Notas'];
+    const lines = leads.map((l) => [l.id, l.fecha.slice(0, 10), l.cliente.nombre, l.cliente.email, l.cliente.telefono,
+      l.configuracion.modelo, l.configuracion.acabado, l.configuracion.extras.join(' + '), num(l.configuracion.precioTotal),
+      num(l.financiacion.entrada), num(l.financiacion.importeFinanciado), l.financiacion.plazoMeses, num(l.financiacion.tin),
+      num(l.financiacion.tae), num(l.financiacion.cuotaMensual), STATUS[l.estado].label, l.notas || ''].map(cell).join(';'));
+    const blob = new Blob(['\uFEFF' + [head.map(cell).join(';'), ...lines].join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement('a'), { href: url, download: 'solicitudes-financiacion.csv' });
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1500);
+  });
+
+  // ---------- Datos de ejemplo y vaciado ----------
+  $('#a-seed').addEventListener('click', () => {
+    const mk = (nombre, model, finish, extras, down, n, tin, estado, daysAgo) => {
+      const total = byId(MODELS, model).price + byId(FINISHES, finish).price + extras.reduce((s, id) => s + byId(EXTRAS, id).price, 0);
+      const financed = total - down, i = tin / 1200;
+      const fee = i === 0 ? financed / n : (financed * i) / (1 - Math.pow(1 + i, -n));
+      const fecha = new Date(Date.now() - daysAgo * 864e5).toISOString();
+      return {
+        id: 'F-' + Math.random().toString(36).slice(2, 8).toUpperCase(), fecha, estado, notas: '',
+        historial: estado === 'nueva' ? [{ fecha, estado }] : [{ fecha, estado: 'nueva' }, { fecha: new Date(Date.parse(fecha) + 864e5).toISOString(), estado }],
+        cliente: { nombre, email: nombre.split(' ')[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') + '@example.com',
+                   telefono: '6' + String(10000000 + Math.floor(Math.random() * 89999999)) },
+        configuracion: { modelo: byId(MODELS, model).name, acabado: byId(FINISHES, finish).name, extras: extras.map((id) => byId(EXTRAS, id).name), precioTotal: total },
+        financiacion: { entrada: down, importeFinanciado: financed, plazoMeses: n, tin, tae: +((Math.pow(1 + i, 12) - 1) * 100).toFixed(2),
+                        cuotaMensual: +fee.toFixed(2), interesesTotales: +(fee * n - financed).toFixed(2) }
+      };
+    };
+    leads = [
+      mk('Laura Gómez', 'urban', 'hueso', ['candado'], 200, 24, 6.9, 'nueva', 0),
+      mk('Hugo Salas', 'cargo', 'cobalto', ['bateria'], 800, 36, 6.9, 'nueva', 0),
+      mk('Andrés Pardo', 'trekking', 'cobalto', ['bateria', 'luces'], 500, 36, 5.5, 'estudio', 1),
+      mk('Marta Ibáñez', 'cargo', 'grafito', ['cesta', 'seguro'], 600, 48, 7.25, 'aprobada', 3),
+      mk('Joan Ferrer', 'trekking', 'grafito', [], 0, 24, 6.9, 'rechazada', 4),
+      mk('Sofía Navarro', 'urban', 'cobre', ['luces', 'seguro'], 300, 12, 4.9, 'formalizada', 8),
+      ...leads
+    ];
+    persist(); renderAdmin();
+  });
+  $('#a-clear').addEventListener('click', () => {
+    if (leads.length && confirm('¿Eliminar TODAS las solicitudes? Esta acción no se puede deshacer.')) { leads = []; persist(); renderAdmin(); }
+  });
+
+  // ---------- Acceso y navegación (#admin muestra el panel; cualquier otro hash, la tienda) ----------
+  $('#admin-login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const ok = $('#pin').value === ADMIN_PIN;
+    $('#pin-error').classList.toggle('hidden', ok);
+    if (!ok) return;
+    adminOk = true; try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (err) {}
+    $('#pin').value = ''; route();
+  });
+  $('#admin-logout').addEventListener('click', () => {
+    adminOk = false; try { sessionStorage.removeItem(SESSION_KEY); } catch (err) {} route();
+  });
+
+  function route() {
+    const admin = location.hash === '#admin';
+    $('#shop').classList.toggle('hidden', admin);
+    $('#admin').classList.toggle('hidden', !admin);
+    $('#admin-login').classList.toggle('hidden', adminOk);
+    $('#admin-panel').classList.toggle('hidden', !adminOk);
+    if (admin && adminOk) renderAdmin();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+  // Si se envía una solicitud desde otra pestaña, el panel se actualiza solo
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORE_KEY) { leads = loadLeads(); if (location.hash === '#admin' && adminOk) renderAdmin(); }
+  });
+
+  // ---------- Arranque ----------
+  renderOptions(); renderOutput(); route();
+})();
+</script>
+</body>
+</html>
